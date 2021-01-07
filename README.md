@@ -11,6 +11,10 @@ Selected-Topics-in-Visual-Recognition-using-Deep-Learning HW4
 
 <!-- /TOC -->
 # Super Resolution
+In this task, the posted model got PSNR 27.33.(Newest result)
+The model is refer to [IMDN](https://github.com/Zheng222/IMDN).
+Because the testing dataset is different from regular dataset, Set14, the result is not the same as evaluation in the paper. 
+
 ![](https://i.imgur.com/s2yPhGt.png)
 
 
@@ -65,7 +69,7 @@ Selected-Topics-in-Visual-Recognition-using-Deep-Learning HW4
         ```
 
 4. Downoad fine-tuned parameters
-    - [IMDN model parameters](https://drive.google.com/file/d/1JsSRb60kXoXlmIq8nODHNsqt9QbFaCyi/view?usp=sharing)
+    - [IMDN model parameters](https://drive.google.com/file/d/13bGFgFg5lgpvaRw3_tsBkfitc2VfTXzd/view?usp=sharing)
     - put the parameter file to checkpoints folder.
 ## Training
 ```
