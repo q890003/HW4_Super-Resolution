@@ -4,7 +4,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from model import architecture
 from data import DIV2K
-import utils   
+import utils
 
 import random
 import argparse, os
@@ -14,7 +14,8 @@ import math
 import numpy as np
 import skimage.color as sc
 from collections import OrderedDict
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'    
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -22,13 +23,13 @@ from torchvision.utils import save_image
 
 args = {}
 args["batch_size"] = 16
-args["testBatchSize"] = 1 
+args["testBatchSize"] = 1
 args["nEpochs"] = 5000
 args["lr"] = 2e-4
 args["step_size"] = 1000
 args["gamma"] = 0.5
 args["cuda"] = True
-args["resume"] = 'path'
+args["resume"] = "path"
 args["start_epoch"] = 1
 args["threads"] = 1
 args["root"] = "./data/training_hr_images/"
@@ -107,6 +108,7 @@ class SSIM:
         )
         return ssim_map.mean()
 
+
 torch.backends.cudnn.benchmark = True
 # random seed
 seed = args["seed"]
@@ -117,7 +119,7 @@ random.seed(seed)
 torch.manual_seed(seed)
 
 cuda = args["cuda"]
-device = torch.device('cuda:0' if cuda else 'cpu')
+device = torch.device("cuda:0" if cuda else "cpu")
 
 print("===> Loading datasets")
 
@@ -129,9 +131,17 @@ train_dataset = DIV2K.div2k(args)
 
 test_dataset = DIV2K.div2k_test(args)
 
-training_data_loader = DataLoader(dataset=train_dataset, num_workers=args["threads"], batch_size=args["batch_size"], shuffle=True, pin_memory=True, drop_last=True)
-testing_data_loader = DataLoader(dataset=test_dataset, num_workers=1, batch_size=args["testBatchSize"],
-                                 shuffle=False)
+training_data_loader = DataLoader(
+    dataset=train_dataset,
+    num_workers=args["threads"],
+    batch_size=args["batch_size"],
+    shuffle=True,
+    pin_memory=True,
+    drop_last=True,
+)
+testing_data_loader = DataLoader(
+    dataset=test_dataset, num_workers=1, batch_size=args["testBatchSize"], shuffle=False
+)
 
 print(len(train_dataset), len(test_dataset))
 psnr = PSNR()
@@ -143,6 +153,7 @@ def tensor_to_PIL(tensor):
     image = image.squeeze(0)
     image = unloader(image)
     return image
+
 
 print("===> Building models")
 args["is_train"] = True
@@ -162,7 +173,7 @@ if args["pretrained"]:
         checkpoint = torch.load(args["pretrained"])
         new_state_dcit = OrderedDict()
         for k, v in checkpoint.items():
-            if 'module' in k:
+            if "module" in k:
                 name = k[7:]
             else:
                 name = k
@@ -185,8 +196,10 @@ optimizer = optim.Adam(model.parameters(), lr=args["lr"])
 
 def train(epoch):
     model.train()
-    utils.adjust_learning_rate(optimizer, epoch, args["step_size"], args["lr"], args["gamma"])
-    print('epoch =', epoch, 'lr = ', optimizer.param_groups[0]['lr'])
+    utils.adjust_learning_rate(
+        optimizer, epoch, args["step_size"], args["lr"], args["gamma"]
+    )
+    print("epoch =", epoch, "lr = ", optimizer.param_groups[0]["lr"])
     _psnr = 0
     for iteration, (lr_tensor, hr_tensor) in enumerate(training_data_loader, 1):
 
@@ -203,8 +216,17 @@ def train(epoch):
         loss_sr.backward()
         optimizer.step()
         if iteration % 10 == 0:
-            print("===> Epoch[{}]({}/{}): Loss_l1: {:.5f}, psnr={:3.5f}".format(epoch+5000, iteration, len(training_data_loader),
-                                                                  loss_l1.item(), psnr(sr_tensor, hr_tensor)), end=', ')
+            print(
+                "===> Epoch[{}]({}/{}): Loss_l1: {:.5f}, psnr={:3.5f}".format(
+                    epoch + 5000,
+                    iteration,
+                    len(training_data_loader),
+                    loss_l1.item(),
+                    psnr(sr_tensor, hr_tensor),
+                ),
+                end=", ",
+            )
+
 
 def valid(epoch):
     model.eval()
@@ -216,11 +238,11 @@ def valid(epoch):
             hr_tensor = hr_tensor.to(device)
         with torch.no_grad():
             pre = model(lr_tensor)
-        
-#         sr_img = pre.clamp(0, 1)
-#         sr_img = utils.tensor2np(pre.cpu()[0])
-#         gt_img = hr_tensor.cpu()[0]
-        
+
+        #         sr_img = pre.clamp(0, 1)
+        #         sr_img = utils.tensor2np(pre.cpu()[0])
+        #         gt_img = hr_tensor.cpu()[0]
+
         sr_img = utils.tensor2np(pre.cpu()[0])
         gt_img = utils.tensor2np(hr_tensor.cpu()[0])
         crop_size = args["scale"]
@@ -237,12 +259,12 @@ def valid(epoch):
     avg_psnr /= len(testing_data_loader)
     avg_ssim /= len(testing_data_loader)
     print("===> Valid. psnr: {:.4f}, ssim: {:.4f}".format(avg_psnr, avg_ssim))
-    
-    global best_psnr 
+
+    global best_psnr
     if best_psnr < avg_psnr:
         best_psnr = avg_psnr
-        dir_name = 'results/result_epoch{}_psnr{}'.format(epoch+5000, str(avg_psnr))
-        
+        dir_name = "results/result_epoch{}_psnr{}".format(epoch + 5000, str(avg_psnr))
+
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
         for i, (lr_tensor, hr_tensor) in enumerate(testing_data_loader):
@@ -250,9 +272,10 @@ def valid(epoch):
             hr_tensor = hr_tensor.to(device)
             with torch.no_grad():
                 pre = model(lr_tensor)
-            save_image(pre[0], dir_name + '/{:02d}.png'.format(i))
-        save_checkpoint(epoch+5000, avg_psnr)
-            
+            save_image(pre[0], dir_name + "/{:02d}.png".format(i))
+        save_checkpoint(epoch + 5000, avg_psnr)
+
+
 def save_checkpoint(epoch, avg_psnr):
     model_folder = "checkpoint_x{}/".format(args["scale"])
     model_out_path = model_folder + "_test_epoch_{}_psnr{}.pth".format(epoch, avg_psnr)
@@ -261,12 +284,13 @@ def save_checkpoint(epoch, avg_psnr):
     torch.save(model.state_dict(), model_out_path)
     print("===> Checkpoint saved to {}".format(model_out_path))
 
+
 def print_network(net):
     num_params = 0
     for param in net.parameters():
         num_params += param.numel()
     print(net)
-    print('Total number of parameters: %d' % num_params)
+    print("Total number of parameters: %d" % num_params)
 
 
 print("===> Training")
@@ -276,4 +300,3 @@ with torch.cuda.device(0):
     for epoch in range(args["start_epoch"], args["nEpochs"] + 1):
         valid(epoch)
         train(epoch)
-        

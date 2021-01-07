@@ -5,6 +5,7 @@ import os
 import torch
 from collections import OrderedDict
 
+
 def compute_psnr(im1, im2):
     p = psnr(im1, im2)
     return p
@@ -12,14 +13,22 @@ def compute_psnr(im1, im2):
 
 def compute_ssim(im1, im2):
     isRGB = len(im1.shape) == 3 and im1.shape[-1] == 3
-    s = ssim(im1, im2, K1=0.01, K2=0.03, gaussian_weights=True, sigma=1.5, use_sample_covariance=False,
-             multichannel=isRGB)
+    s = ssim(
+        im1,
+        im2,
+        K1=0.01,
+        K2=0.03,
+        gaussian_weights=True,
+        sigma=1.5,
+        use_sample_covariance=False,
+        multichannel=isRGB,
+    )
     return s
 
 
 def shave(im, border):
     border = [border, border]
-    im = im[border[0]:-border[0], border[1]:-border[1], ...]
+    im = im[border[0] : -border[0], border[1] : -border[1], ...]
     return im
 
 
@@ -55,6 +64,7 @@ def tensor2np(tensor, out_type=np.uint8, min_max=(0, 1)):
 
     return img_np.astype(out_type)
 
+
 def convert2np(tensor):
     return tensor.cpu().mul(255).clamp(0, 255).byte().squeeze().permute(1, 2, 0).numpy()
 
@@ -63,14 +73,15 @@ def adjust_learning_rate(optimizer, epoch, step_size, lr_init, gamma):
     factor = epoch // step_size
     lr = lr_init * (gamma ** factor)
     for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+        param_group["lr"] = lr
+
 
 def load_state_dict(path):
 
     state_dict = torch.load(path)
     new_state_dcit = OrderedDict()
     for k, v in state_dict.items():
-        if 'module' in k:
+        if "module" in k:
             name = k[7:]
         else:
             name = k

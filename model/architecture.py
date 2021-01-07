@@ -7,9 +7,11 @@ class IMDN_AS(nn.Module):
     def __init__(self, in_nc=3, nf=64, num_modules=6, out_nc=3, upscale=4):
         super(IMDN_AS, self).__init__()
 
-        self.fea_conv = nn.Sequential(B.conv_layer(in_nc, nf, kernel_size=3, stride=2),
-                                      nn.LeakyReLU(0.05),
-                                      B.conv_layer(nf, nf, kernel_size=3, stride=2))
+        self.fea_conv = nn.Sequential(
+            B.conv_layer(in_nc, nf, kernel_size=3, stride=2),
+            nn.LeakyReLU(0.05),
+            B.conv_layer(nf, nf, kernel_size=3, stride=2),
+        )
 
         # IMDBs
         self.IMDB1 = B.IMDModule(in_channels=nf)
@@ -18,13 +20,12 @@ class IMDN_AS(nn.Module):
         self.IMDB4 = B.IMDModule(in_channels=nf)
         self.IMDB5 = B.IMDModule(in_channels=nf)
         self.IMDB6 = B.IMDModule(in_channels=nf)
-        self.c = B.conv_block(nf * num_modules, nf, kernel_size=1, act_type='lrelu')
+        self.c = B.conv_block(nf * num_modules, nf, kernel_size=1, act_type="lrelu")
 
         self.LR_conv = B.conv_layer(nf, nf, kernel_size=3)
 
         upsample_block = B.pixelshuffle_block
         self.upsampler = upsample_block(nf, out_nc, upscale_factor=upscale)
-
 
     def forward(self, input):
         out_fea = self.fea_conv(input)
@@ -35,10 +36,13 @@ class IMDN_AS(nn.Module):
         out_B5 = self.IMDB5(out_B4)
         out_B6 = self.IMDB6(out_B5)
 
-        out_B = self.c(torch.cat([out_B1, out_B2, out_B3, out_B4, out_B5, out_B6], dim=1))
+        out_B = self.c(
+            torch.cat([out_B1, out_B2, out_B3, out_B4, out_B5, out_B6], dim=1)
+        )
         out_lr = self.LR_conv(out_B) + out_fea
         output = self.upsampler(out_lr)
         return output
+
 
 class IMDN(nn.Module):
     def __init__(self, in_nc=3, nf=64, num_modules=6, out_nc=3, upscale=4):
@@ -53,13 +57,12 @@ class IMDN(nn.Module):
         self.IMDB4 = B.IMDModule(in_channels=nf)
         self.IMDB5 = B.IMDModule(in_channels=nf)
         self.IMDB6 = B.IMDModule(in_channels=nf)
-        self.c = B.conv_block(nf * num_modules, nf, kernel_size=1, act_type='lrelu')
+        self.c = B.conv_block(nf * num_modules, nf, kernel_size=1, act_type="lrelu")
 
         self.LR_conv = B.conv_layer(nf, nf, kernel_size=3)
 
         upsample_block = B.pixelshuffle_block
         self.upsampler = upsample_block(nf, out_nc, upscale_factor=upscale)
-
 
     def forward(self, input):
         out_fea = self.fea_conv(input)
@@ -70,10 +73,13 @@ class IMDN(nn.Module):
         out_B5 = self.IMDB5(out_B4)
         out_B6 = self.IMDB6(out_B5)
 
-        out_B = self.c(torch.cat([out_B1, out_B2, out_B3, out_B4, out_B5, out_B6], dim=1))
+        out_B = self.c(
+            torch.cat([out_B1, out_B2, out_B3, out_B4, out_B5, out_B6], dim=1)
+        )
         out_lr = self.LR_conv(out_B) + out_fea
         output = self.upsampler(out_lr)
         return output
+
 
 # AI in RTC Image Super-Resolution Algorithm Performance Comparison Challenge (Winner solution)
 class IMDN_RTC(nn.Module):
@@ -87,8 +93,9 @@ class IMDN_RTC(nn.Module):
         upsample_block = B.pixelshuffle_block
         upsampler = upsample_block(nf, out_nc, upscale_factor=upscale)
 
-        self.model = B.sequential(*fea_conv, B.ShortcutBlock(B.sequential(*rb_blocks, LR_conv)),
-                                  *upsampler)
+        self.model = B.sequential(
+            *fea_conv, B.ShortcutBlock(B.sequential(*rb_blocks, LR_conv)), *upsampler
+        )
 
     def forward(self, input):
         output = self.model(input)
@@ -99,9 +106,11 @@ class IMDN_RTE(nn.Module):
     def __init__(self, upscale=2, in_nc=3, nf=20, out_nc=3):
         super(IMDN_RTE, self).__init__()
         self.upscale = upscale
-        self.fea_conv = nn.Sequential(B.conv_layer(in_nc, nf, 3),
-                                      nn.ReLU(inplace=True),
-                                      B.conv_layer(nf, nf, 3, stride=2, bias=False))
+        self.fea_conv = nn.Sequential(
+            B.conv_layer(in_nc, nf, 3),
+            nn.ReLU(inplace=True),
+            B.conv_layer(nf, nf, 3, stride=2, bias=False),
+        )
 
         self.block1 = IMDModule_Large(nf)
         self.block2 = IMDModule_Large(nf)
@@ -112,7 +121,7 @@ class IMDN_RTE(nn.Module):
 
         self.LR_conv = B.conv_layer(nf, nf, 1, bias=False)
 
-        self.upsampler = B.pixelshuffle_block(nf, out_nc, upscale_factor=upscale**2)
+        self.upsampler = B.pixelshuffle_block(nf, out_nc, upscale_factor=upscale ** 2)
 
     def forward(self, input):
 
@@ -129,4 +138,3 @@ class IMDN_RTE(nn.Module):
         output = self.upsampler(out_lr)
 
         return output
-
