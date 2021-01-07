@@ -31,7 +31,7 @@ args["cuda"] = True
 args["resume"] = 'path'
 args["start_epoch"] = 1
 args["threads"] = 1
-args["root"] = "../data/training_hr_images/"
+args["root"] = "./data/training_hr_images/"
 args["n_train"] = 10
 args["n_val"] = 1
 args["test_every"] = 2
@@ -39,7 +39,7 @@ args["scale"] = 3
 args["patch_size"] = 96
 args["rgb_range"] = 1
 args["n_colors"] = 3
-args["pretrained"] = "No" #"./checkpoints/IMDN_x3.pth"
+args["pretrained"] = "./checkpoint_x3/_test_epoch_5321_psnr25.25416464562951.pth"
 args["seed"] = 47
 args["isY"] = True
 args["ext"] = ".npy"
@@ -241,7 +241,7 @@ def valid(epoch):
     global best_psnr 
     if best_psnr < avg_psnr:
         best_psnr = avg_psnr
-        dir_name = 'results/no_aug/result_epoch{}_psnr{}'.format(epoch+5000, str(avg_psnr))
+        dir_name = 'results/result_epoch{}_psnr{}'.format(epoch+5000, str(avg_psnr))
         
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)

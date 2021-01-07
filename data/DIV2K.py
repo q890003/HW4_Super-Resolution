@@ -79,7 +79,7 @@ class div2k(data.Dataset):
 class div2k_test(data.Dataset):
     def __init__(self, opt):
         self.opt = opt
-        self.root = "../data/"
+        self.root = "./data/"
         self.ext = ".png" #self.opt["ext"]   # '.png' or '.npy'(default)
         self._set_filesystem(self.root)
         self.images_hr = [self.dir_hr + "{:02d}.png".format(i) for i in range(14)]
