@@ -42,6 +42,8 @@ Selected-Topics-in-Visual-Recognition-using-Deep-Learning HW4
         ```
         |- HW4_Super-Resolution
             |- data/
+                |- Set14/
+                    |- (Testing data for validation)
                 |- testing_lr_images
                 |- training_hr_images
                 |- DIV2K.py
